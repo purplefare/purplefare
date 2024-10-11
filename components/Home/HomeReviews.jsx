@@ -45,7 +45,7 @@ export default function HomeReviews(props){
 					items:2
 				}
 			};
-			if(BannerView!=''){
+			if(reviewView!=''){
 				return(
 					<>
 						<div className="container mt-5 pt-2">
