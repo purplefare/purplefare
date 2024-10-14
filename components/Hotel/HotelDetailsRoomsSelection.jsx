@@ -43,6 +43,7 @@ function HotelDetailsRoomsSelection(props){
     const [searchString,setSearchString] = useState("");
     const [saveSearchParams,setSearchParams] = useState("");
     const [userUniqueId,setUserUniqueId]  = useState("");
+    const [actionLoader, setActionLoader] = useState(false);
     useEffect(() => {  
         let mounted = true;
         if(localStorage.getItem('uuid')!=null && localStorage.getItem('uuid')!=undefined && localStorage.getItem('uuid')!=''){
@@ -224,6 +225,7 @@ function HotelDetailsRoomsSelection(props){
             setProceedBookingPopupText(alertText);
             return false;
         }else{
+            setActionLoader(true);
             setErrorBooking(false);
             setErrorBookingText("");           
             saveBooking();             
@@ -231,6 +233,7 @@ function HotelDetailsRoomsSelection(props){
     }
 
     const handleForceProceedBooking = () => {
+        setActionLoader(true);
         saveBooking();
     }
 
@@ -239,8 +242,10 @@ function HotelDetailsRoomsSelection(props){
         const responseData = await HotelRepository.saveBooking(params);
         if(responseData.success==1){
             Router.push(`${baseStoreURL}/hotels/review?${searchString}`);
+            setActionLoader(false);
         }else{
             return false;
+            setActionLoader(false);
         }
     }
     
@@ -487,12 +492,14 @@ function HotelDetailsRoomsSelection(props){
             <div className="dromtypeLeft">
                 {roomDetails['images']!=null?
                 <div className="hdgalleryRoomMobile">
-                    <div className="hdgmroomInn">
-                        {roomDetails['images'].map((item,i) => (
-                            <div className="hdgroomSlide" key={i}>
-                                <img src={`${item.image_base_url}${item.path}`} alt={`${item.roomCode}`}/>
-                            </div>
-                        ))}
+                    <div className="hdgmroomInn">                   
+                        <div className="hdgroomSlide">
+                            <OwlCarousel className='owl-theme' responsive={responsiveObject} slideBy={1} loop={true} lazyLoad={true} autoplay={true} dots={true} margin={10} navText={['<a href="javascript:void(0);" class="ssArrow lSlideArrow"><img src="'+baseStoreURL+'/images/home/left-slider-arrow.png" alt="left-slider-arrow.png" class="img-fluid"/></a>','<a href="javascript:void(0);" class="ssArrow rSlideArrow"><img src="'+baseStoreURL+'/images/home/right-slider-arrow.png" alt="right-slider-arrow.png" class="img-fluid" /></a>']} nav>
+                            {roomDetails['images'].map((item,i) => (
+                                <img  key={i} src={`${item.image_base_url}${item.path}`} alt={`${item.roomCode}`}/>
+                            ))}
+                            </OwlCarousel>
+                        </div>                        
                     </div>
                 </div>
                 :''}
@@ -579,22 +586,38 @@ function HotelDetailsRoomsSelection(props){
                 let nextDayCancellation = nextDay.toDateString(); 
                 let date = new Date(cancelItem.from).toDateString();
                 let checkInDateStart = new Date(Router.query.checkInDate).toDateString();
+                let checkInDateObject = new Date(Router.query.checkInDate);
                 if(rateItem!=undefined && rateItem!=null && rateItem!=''){
-                    if(cancelItem.new_amount==rateItem.new_net && date==checkInDateStart){
+                    if(cancelDateObject>new Date() && cancelDateObject<checkInDateObject){
+                        if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
+                            return (
+                                <>
+                                <li key={k}>Free Cancellation before {date}</li>
+                                {cancelItem.new_amount==rateItem.new_net?
+                                <li key={k}><span className="text-red">Non Refundable after {date}</span></li>
+                                :
+                                <li key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</li>
+                                }
+                                </>
+                            );
+                        }else if(cancelItem.new_amount==rateItem.new_net && date==checkInDateStart){
+                            return(<li key={k}><span className="redColor">Non Refundable</span></li>);
+                        }else if(date<checkInDateStart){
+                            return(<li key={k}><span className="redColor">Non Refundable</span></li>);
+                        }else if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
+                            return (
+                                <>
+                                <li key={k}>Free Cancellation before {date}</li>
+                                {cancelItem.new_amount==rateItem.new_net?
+                                <li key={k}><span className="redColor">Non Refundable after {date}</span></li>
+                                :
+                                <li key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</li>
+                                }
+                                </>
+                            );
+                        }
+                    }else{
                         return(<li key={k}><span className="redColor">Non Refundable</span></li>);
-                    }else if(date<checkInDateStart){
-                        return(<li key={k}><span className="redColor">Non Refundable</span></li>);
-                    }else if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
-                        return (
-                            <>
-                            <li key={k}>Free Cancellation before {date}</li>
-                            {cancelItem.new_amount==rateItem.new_net?
-                            <li key={k}><span className="redColor">Non Refundable after {date}</span></li>
-                            :
-                            <li key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</li>
-                            }
-                            </>
-                        );
                     }
                 }else{
                     return (
@@ -996,6 +1019,9 @@ function HotelDetailsRoomsSelection(props){
                     {roomDetailPopupHTMl}   
                 </div>
             </div>   
+            <div className="loaderbg" style={{display:actionLoader==false?"none":"block"}}>
+                <img src={`${baseStoreURL}/images/purplefare-loader.gif`} alt="purplefare-loader.gif" />
+            </div>
             <ToastContainer autoClose={2000} closeOnClick draggable theme="light"/>
             </Fragment>
         );
