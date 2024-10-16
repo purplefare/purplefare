@@ -3,7 +3,8 @@ name: Deployment Workflow
 # Trigger this workflow on pushes to the specified branch
 on:
   push:
-    branches: GithubActionRelease
+    branches: 
+      - GithubActionRelease
      
 
 jobs:
