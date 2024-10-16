@@ -391,7 +391,7 @@ function NavHeader (props) {
 						<input type="password" id="register-password" name="password" maxLength="20" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} required={true}/>
 						<p className="check-mark">
 						<input type="checkbox" id="accept-terms" name="terms-conditions" onClick={handleRegisterTermsConditions} value={registerTermsConditions} checked={registerTermsConditions==1?true:false}/>
-						<label for="accept-terms">By proceeding, you agree with our <Link href={`${baseStoreURL}/pages/terms-conditions`}>Terms of Service</Link>, <Link href={`${baseStoreURL}/pages/privacy-policy`}>Privacy Policy</Link>.</label>
+						<label for="accept-terms">By proceeding,       you agree with our <Link href={`${baseStoreURL}/pages/terms-conditions`}>Terms of Service</Link>, <Link href={`${baseStoreURL}/pages/privacy-policy`}>Privacy Policy</Link>.</label>
 						</p>
 						<input type="submit" className="subBtn" id="register-submit" value={`${actionBtnLoading==true?'Please wait':'Create Account'}`}/>	
 					</div>
