@@ -19,7 +19,7 @@ export default function HomeAboutUs(props){
 							<div>
 									<h2 className="title-2 pb-3">About Us</h2>
 								{parse(aboutContent)}
-								<Link href={`${baseStoreURL}/pages/about-us`}>View More</Link>
+								<Link href={`${baseStoreURL}/pages/about-us`}>View More11</Link>
 							</div>
 						</div>
 					</div>
