@@ -18,7 +18,7 @@ export default function HotelListingHeader(){
 							</ul>
 							<div className="col-md-3 text-end hdRight">
 								<button type="button" className="btn btn-outline-primary me-2">
-									<img src="images/home/user-icon.png" alt="" /> Login
+									<img src="images/home/user-icon.png" alt="" /> Login1
 								</button>
 							</div>
 						</div>
