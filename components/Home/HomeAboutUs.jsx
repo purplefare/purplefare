@@ -17,9 +17,7 @@ export default function HomeAboutUs(props){
 					<div className="col-md-6">
 						<div className="hAbtText">
 							<div>
-								<h2 className="title-2 pb-3">About Us</h2>
-								{parse(aboutContent)}
-								<Link href={`${baseStoreURL}/pages/about-us`}>View More</Link>
+								asdasdasdasdasd
 							</div>
 						</div>
 					</div>
