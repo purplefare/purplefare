@@ -33,5 +33,5 @@ jobs:
             git pull
             npm install
             npm run build
-            pm2 restart nextjs-app
-            # ---pm2 start npm --name nextjs-app -- run start -- -p 3000 # Replace with your PM2 service name
+            pm2 restart your-nextjs-app
+            # ---pm2 start npm --name your-nextjs-app -- run start -- -p 3000 # Replace with your PM2 service name
