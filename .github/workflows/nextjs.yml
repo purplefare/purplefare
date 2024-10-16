@@ -25,9 +25,9 @@ jobs:
         # Use the 'appleboy/ssh-action' action for SSH deployment
         uses: appleboy/ssh-action@master
         with:
-          host: 3.137.79.47 # Your server's IP address
-          username: ec2-user # Your server's username
-          key: PurpleFareKey.pem # Your server's SSH private key
+          host: ${{ secrets.HOST }} # Your server's IP address
+          username: ${{ secrets.USERNAME }} # Your server's username
+          key: ${{ secrets.SSH_PRIVATE_KEY }} # Your server's SSH private key
           script: |
             cd purplefare # Specify the path to your app directory on the server
             git pull
