@@ -253,8 +253,9 @@ function HotelDetailsRoomsSelection(props){
         let params = {'hotel':hotel,'uuid':userUniqueId,'searchParams':saveSearchParams,'checkInDate':Router.query.checkInDate,'checkOutDate':Router.query.checkOutDate,'hotelBooking':hotelBooking};
         const responseData = await HotelRepository.saveBooking(params);
         if(responseData.success==1){
-            Router.push(`${baseStoreURL}/hotels/review?${searchString}`);
             setActionLoader(false);
+            setProceedBookingPopupDisplay(false);
+            Router.push(`${baseStoreURL}/hotels/review?${searchString}`);            
         }else{
             return false;
             setActionLoader(false);

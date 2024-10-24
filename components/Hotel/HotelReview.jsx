@@ -760,7 +760,7 @@ function HotelReview(props){
                             <Elements stripe={stripePromise}>
                             <HotelCheckoutForm
                                 order_id={reviewBooking.bookingId}
-                                order_amount={reviewBooking.bookingPayableAmount}
+                                order_amount={parseFloat(reviewBooking.bookingPayableAmount.toFixed(2))}
                                 customer_email={holderEmail}
                                 bookingInfo={reviewBooking}
                                 holderName={holderName}
