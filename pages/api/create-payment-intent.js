@@ -9,11 +9,10 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { order_id, order_amount, customer_email } = req.body;
     let stripeAmount = parseFloat((order_amount * 100).toFixed(2));
-    console.log(stripeAmount);
     try {
       // Create a PaymentIntent with the order details
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: stripeAmount * 100, // Amount in cents
+        amount: stripeAmount, // Amount in cents
         currency: 'usd', // Set the currency
         metadata: { order_id },
         receipt_email: customer_email, // Customer email for receipt
