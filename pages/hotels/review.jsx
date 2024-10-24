@@ -36,7 +36,6 @@ const HotelReviewPage = (props) => {
                     </div>
                 </section>
             </section>
-        <Footer/>
         </Fragment>
     );
 }

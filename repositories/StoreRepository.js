@@ -59,6 +59,24 @@ class StoreRepository {
         return reponse;
     }
 
+    async fetchHomePage(){
+        const reponse = await Repository.post(`${baseUrl}/fetch-homepage`)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => ({ error: JSON.stringify(error) }));
+        return reponse; 
+    }
+
+    async fetchHomePageMostBookedHotels(){
+         const reponse = await Repository.post(`${baseUrl}/fetch-homepage-most-booked-hotels`)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => ({ error: JSON.stringify(error) }));
+        return reponse; 
+    }
+
     async saveContactQuery(params){
         const reponse = await Repository.post(`${baseUrl}/save-contact-query`,params)
         .then((response) => {

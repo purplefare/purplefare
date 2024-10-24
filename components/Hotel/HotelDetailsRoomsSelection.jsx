@@ -16,6 +16,7 @@ import 'owl.carousel/dist/assets/owl.theme.default.css';
 import { addRoom,increaseRoomQty,getHotelBooking, removeRoom, clearHotelBooking } from '@/store/booking/action';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import parse from 'html-react-parser';
 
 function HotelDetailsRoomsSelection(props){
     const dispatch = useDispatch();
@@ -151,16 +152,6 @@ function HotelDetailsRoomsSelection(props){
         }
 
         let taxes = 0;
-        if(rateItem.taxes!=undefined && rateItem.taxes!=null && rateItem.taxes!=''){
-            if(rateItem.taxes.taxes!=undefined && rateItem.taxes.taxes!=null && rateItem.taxes.taxes!=''){
-                let rateItemTaxes = rateItem.taxes.taxes;
-                if(rateItemTaxes.length>0){
-                    if(rateItemTaxes[0].new_amount!=null && rateItemTaxes[0].new_amount!=undefined && rateItemTaxes[0].new_amount!=''){
-                        taxes = rateItemTaxes[0].new_amount;
-                    }
-                }
-            }
-        }
         let roomRate = {            
             'id':rateItem.rateKey,
             'quantity':1,
@@ -530,7 +521,7 @@ function HotelDetailsRoomsSelection(props){
                         {roomDetails['images']!=null?
                             <OwlCarousel className='owl-theme' responsive={responsiveObject} slideBy={1} loop={true} lazyLoad={true} autoplay={true} dots={true} margin={10} navText={['<a href="javascript:void(0);" class="ssArrow lSlideArrow"><img src="'+baseStoreURL+'/images/home/left-slider-arrow.png" alt="left-slider-arrow.png" class="img-fluid"/></a>','<a href="javascript:void(0);" class="ssArrow rSlideArrow"><img src="'+baseStoreURL+'/images/home/right-slider-arrow.png" alt="right-slider-arrow.png" class="img-fluid" /></a>']} nav>
                                 {roomDetails['images'].map((item,i) => (
-                                    <img src={`${item.image_base_url}${item.path}`} alt={`${roomDetails['roomMainImage'].roomCode}`} className="img-fluid" />
+                                    <img key={i} src={`${item.image_base_url}${item.path}`} alt={`${roomDetails['roomMainImage'].roomCode}`} className="img-fluid" />
                                 ))}
                             </OwlCarousel>
                         :
@@ -623,8 +614,6 @@ function HotelDetailsRoomsSelection(props){
                             );
                         }else if(cancelItem.new_amount==rateItem.new_net && date==checkInDateStart){
                             return(<li key={k}><span className="redColor">Non Refundable</span></li>);
-                        }else if(date<checkInDateStart){
-                            return(<li key={k}><span className="redColor">Non Refundable</span></li>);
                         }else if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
                             return (
                                 <>
@@ -636,6 +625,19 @@ function HotelDetailsRoomsSelection(props){
                                 }
                                 </>
                             );
+                        }else if(cancelItem.new_amount!=rateItem.new_net && date!=checkInDateStart){
+                            return (
+                                <>
+                                <li key={k}>Free Cancellation before {date}</li>
+                                {cancelItem.new_amount==rateItem.new_net?
+                                <li key={k}><span className="redColor">Non Refundable after {date}</span></li>
+                                :
+                                <li key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</li>
+                                }
+                                </>
+                            );
+                        }else if(date<checkInDateStart){
+                            return(<li key={k}><span className="redColor">Non Refundable</span></li>);
                         }
                     }else{
                         return(<li key={k}><span className="redColor">Non Refundable</span></li>);
@@ -671,16 +673,6 @@ function HotelDetailsRoomsSelection(props){
         }
         let disableAddBtn = false;
         let taxes = 0;
-        if(rateItem.taxes!=undefined && rateItem.taxes!=null && rateItem.taxes!=''){
-            if(rateItem.taxes.taxes!=undefined && rateItem.taxes.taxes!=null && rateItem.taxes.taxes!=''){
-                let rateItemTaxes = rateItem.taxes.taxes;
-                if(rateItemTaxes.length>0){
-                    if(rateItemTaxes[0].new_amount!=null && rateItemTaxes[0].new_amount!=undefined && rateItemTaxes[0].new_amount!=''){
-                        taxes = rateItemTaxes[0].new_amount;
-                    }
-                }
-            }
-        }
         let sameRoomCodeBookings = hotelBooking.hotelBookingRooms.filter(
 			item => item.id === rateItem.rateKey
 		);
@@ -740,17 +732,33 @@ function HotelDetailsRoomsSelection(props){
         let cancellationPolicy = "";
         let rateComments = "";
         let promotionText = "";
+        let offersText = "";
+        let taxesText = "";
         if(rateItem.rateComments!=null && rateItem.rateComments!=undefined && rateItem.rateComments!=''){
             rateComments = (
-                <li>{rateItem.rateComments}</li>
+                rateItem.rateComments.map((rateComment,i) => (
+                    <li key={i}>{parse(rateComment.description)}</li>
+                ))
             );
         }
         if(rateItem.promotions!=null && rateItem.promotions!=undefined && rateItem.promotions!=''){
-            if(rateItem.promotions.name!=null && rateItem.promotions.name!=undefined && rateItem.promotions.name!=''){
-                promotionText = (
-                    <li>{rateItem.promotions.name}</li>
-                );
-            }
+            promotionText = (
+                <li>{rateItem.promotions}</li>
+            );
+        }
+        if(rateItem.offers!=null && rateItem.offers!=undefined && rateItem.offers!=''){
+            offersText = (
+                rateItem.offers.map((offer,i) => (
+                    <li key={i}>{offer.name} {offer.new_amount}</li>
+                ))
+            );
+        }
+        if(rateItem.tax_lines!=null && rateItem.tax_lines!=undefined && rateItem.tax_lines!=''){
+            taxesText = (
+                rateItem.tax_lines.map((taxLine,i) => (
+                    <li key={i}>{taxLine}</li>
+                ))
+            );
         }
         let boardName = rateItem.boardName;
         if(rateItem.cancellationPolicies!=undefined && rateItem.cancellationPolicies!=null && rateItem.cancellationPolicies!=''){
@@ -793,7 +801,9 @@ function HotelDetailsRoomsSelection(props){
             <ul>   
                 {cancellationPolicy}    
                 {rateComments}  
-                {promotionText}      
+                {promotionText} 
+                {offersText} 
+                {taxesText}    
                 {mealType}
             </ul>
         )

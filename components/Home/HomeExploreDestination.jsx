@@ -20,7 +20,7 @@ export default function HomeExploreDestination(props){
 											<span><Link href={`${baseStoreURL}/${dest.hotel_link}`}>{dest.hotel_label}</Link></span>
 											<h2>{dest.destination}</h2>
 										</div>
-										<div class="expImgCover"><img src={dest.mob_image} alt={dest.destination} className="img-fluid"/></div>
+										<div className="expImgCover"><img src={dest.mob_image} alt={dest.destination} className="img-fluid"/></div>
 									</div>
 									))}
 								</div>
@@ -38,7 +38,7 @@ export default function HomeExploreDestination(props){
 									<span><Link href={`${baseStoreURL}/${dest.hotel_link}`} target="_blank">{dest.hotel_label}</Link></span>
 									<h2>{dest.destination}</h2>
 								</div>
-								<div class="expImgCover"><img src={dest.image} alt={dest.destination} className="img-fluid" /></div>
+								<div className="expImgCover"><img src={dest.image} alt={dest.destination} className="img-fluid" /></div>
 							</div>
 							))}
 						</div>
@@ -52,7 +52,7 @@ export default function HomeExploreDestination(props){
 									<span><Link href={`${baseStoreURL}/${dest.hotel_link}`} target="_blank">{dest.hotel_label}</Link></span>
 									<h2>{dest.destination}</h2>
 								</div>
-								<div class="expImgCover"><img src={dest.image} alt={dest.destination} className="img-fluid" /></div>
+								<div className="expImgCover"><img src={dest.image} alt={dest.destination} className="img-fluid" /></div>
 							</div>
 							))}
 						</div>

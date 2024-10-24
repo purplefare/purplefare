@@ -49,6 +49,10 @@ const Header = (props) => {
 			<meta property="og:image" content="PurpleFare.com"/>
 			<meta property="og:site_name" content="PurpleFare.com"/>
 			<meta property="og:description" content={`${meta_description}`}/>
+			<link rel="shortcut icon" href={`${baseStoreURL}/images/favicon.png`} />
+			<link rel="icon" href={`${baseStoreURL}/images/favicon.png`} sizes="32x32" />
+			<link rel="icon" href={`${baseStoreURL}/images/favicon.png`} sizes="192x192" />
+			<link rel="apple-touch-icon-precomposed" href={`${baseStoreURL}/images/favicon.png`} />
 			<link rel="canonical" href={`${baseStoreURL}${currentPath}`}/>			
 		</Head>
 	);

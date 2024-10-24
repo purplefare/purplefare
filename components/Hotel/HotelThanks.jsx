@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 config.autoAddCss = false;
+import parse from 'html-react-parser';
 import { faCheck, faCloudDownloadAlt, faHamburger, faPhone, faTicketAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons'
 
 function HotelThanks(props){
@@ -83,6 +84,33 @@ function HotelThanks(props){
         setInclusionPopupDisplay(!inclusionPopupDisplay);
     }
 
+    const handleDownloadVoucher = (bookingId,bookingReference) => {
+        let params = {'bookingId':bookingId,'bookingReference':bookingReference};
+        downloadVoucher(params);
+    }
+
+    async function downloadVoucher(params){
+        setLoading(true);
+        const responseData = await HotelRepository.downloadVoucher(params);
+        if(responseData.success==1){
+            toast.success(responseData.message);
+            // Trigger a file download using the URL
+            const a = document.createElement('a');
+            a.href = responseData.data.voucher_file;
+            a.target = '_blank'; // Open in a new tab
+            a.download = ''; // You can specify a filename here if you want to override the default
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up by removing the anchor element
+            document.body.removeChild(a);
+            setLoading(false);
+        }else{
+            toast.error(responseData.message);
+            setLoading(false);
+        }
+    }
+
     async function fetchSuccessHotelBooking(referenceNo){
         let params = {'referenceNo':referenceNo};
         const responseData = await HotelRepository.fetchBooking(params);
@@ -114,38 +142,49 @@ function HotelThanks(props){
                         if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
                             return (
                                 <>
-                                <span className="smallTxt piInclude" key={k}>Free Cancellation before {date}</span>
+                                <span className="smallTxt piInclude">Free Cancellation before {date}</span>
                                 {cancelItem.new_amount==rateItem.new_net?
-                                <span className="smallTxt piInclude" key={k}><span className="text-red">Non Refundable after {date}</span></span>
+                                <span className="smallTxt piInclude"><span className="text-red">Non Refundable after {date}</span></span>
                                 :
-                                <span className="smallTxt piInclude" key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
+                                <span className="smallTxt piInclude">Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
                                 }
                                 </>
                             );
                         }else if(cancelItem.new_amount==rateItem.new_net && date==checkInDateStart){
-                            return(<span className="smallTxt piInclude" key={k}><span className="text-red">Non Refundable</span></span>);
-                        }else if(date<checkInDateStart){
-                            return(<span className="smallTxt piInclude" key={k}><span className="text-red">Non Refundable</span></span>);
-                        }else if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
+                            return(<span className="smallTxt piInclude"><span className="text-red">Non Refundable</span></span>);
+                        }else if(cancelItem.new_amount!=rateItem.new_net && date!=checkInDateStart){
                             return (
                                 <>
-                                <span className="smallTxt piInclude" key={k}>Free Cancellation before {date}</span>
+                                <span className="smallTxt piInclude">Free Cancellation before {date}</span>
                                 {cancelItem.new_amount==rateItem.new_net?
-                                <span className="smallTxt piInclude" key={k}><span className="text-red">Non Refundable after {date}</span></span>
+                                <span className="smallTxt piInclude"><span className="redColor">Non Refundable after {date}</span></span>
                                 :
-                                <span className="smallTxt piInclude" key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
+                                <span className="smallTxt piInclude">Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
                                 }
                                 </>
                             );
+                        }else if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
+                            return (
+                                <>
+                                <span className="smallTxt piInclude">Free Cancellation before {date}</span>
+                                {cancelItem.new_amount==rateItem.new_net?
+                                <span className="smallTxt piInclude"><span className="text-red">Non Refundable after {date}</span></span>
+                                :
+                                <span className="smallTxt piInclude">Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
+                                }
+                                </>
+                            );
+                        }else if(date<checkInDateStart){
+                            return(<span className="smallTxt piInclude"><span className="text-red">Non Refundable</span></span>);
                         }
                     }else{
-                        return(<span className="smallTxt piInclude" key={k}><span className="text-red">Non Refundable</span></span>);
+                        return(<span className="smallTxt piInclude"><span className="text-red">Non Refundable</span></span>);
                     }
                 }else{
                     return (
                         <>
-                        <span className="smallTxt piInclude" key={k}>Free Cancellation before {date}</span>
-                        <span className="smallTxt piInclude" key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
+                        <span className="smallTxt piInclude">Free Cancellation before {date}</span>
+                        <span className="smallTxt piInclude">Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</span>
                         </>
                     );
                 }
@@ -177,7 +216,9 @@ function HotelThanks(props){
         let refundableText = "";
         if(rateItem.rateComments!=null && rateItem.rateComments!=undefined && rateItem.rateComments!=''){
             rateComments = (
-                <span className="smallTxt piInclude">{rateItem.rateComments}</span>
+                rateItem.rateComments.map((afterSplitComment,i) => (
+                    <span className="smallTxt piInclude">{parse(afterSplitComment.description)}</span>
+                ))
             );
         }
         if(rateItem.promotions!=null && rateItem.promotions!=undefined && rateItem.promotions!=''){
@@ -354,11 +395,6 @@ function HotelThanks(props){
 
     if(!loading && booking!=null){
         let hotel = JSON.parse(booking.hotelDetail);
-        if(booking.rooms.length>0 && Array.isArray(booking.rooms)){
-            if(booking.rooms[0].rateComments!='' && booking.rooms[0].rateComments!=null && booking.rooms[0].rateComments!=undefined){
-                setRateComment(booking.rooms[0].rateComments);
-            }
-        }
         let params = JSON.parse(booking.searchParams);
         let queryString = Object.keys(params).map(function(key) {
             return key + '=' + params[key];
@@ -384,7 +420,7 @@ function HotelThanks(props){
                     <div className="boxWithShadow mb-3">
                         <div className="sumrybid">
                             <div>Summary</div>
-                            <div><span className="gray">Booking ID</span> {booking.bookingReference}</div>
+                            <div><span className="gray">Booking ID</span> {booking.bookingId}</div>
                         </div>
                         <div className="bkInfoBox">
                             <div className="bkInfoBoxImg">
@@ -394,9 +430,7 @@ function HotelThanks(props){
                                 <div className="dhName">
                                     <h2>{booking.hotelName} 
                                         <div className="hdStrRate">
-                                            {generateTempArray(Math.round(hotel.rating).toFixed(1)).map((i) => (
-                                                <img src={`${baseStoreURL}/images/star-active.png`} alt="star-active.png" className="hstrActive"/>
-                                            ))}
+                                            <p>{hotel.category}</p>
                                         </div>
                                     </h2>
                                     <p><i className="fas fa-map-marker-alt"></i> {titleCase(hotel.address)}, {titleCase(hotel.city)}, {titleCase(hotel.country)}</p>                                
@@ -476,6 +510,13 @@ function HotelThanks(props){
                                 {rateComments!=''?
                                 <li>{rateComments}</li>
                                 :''}
+                                {hotel.amenities.length>0?
+                                    hotel.amenities.map((amenity,i) => (
+                                    amenity.key=='Things to keep in mind'?
+                                    <li key={i}>{amenity.value}</li>  
+                                    :''
+                                    ))
+                                :''}
                             </ul>
                         </div>
                     </div>
@@ -491,7 +532,7 @@ function HotelThanks(props){
                                 <li><Link href={`${baseStoreURL}/hotels/cancel-booking/${booking.bookingReference}`}><FontAwesomeIcon icon={faTicketAlt} /> Cancel Booking</Link></li>
                                 <li style={{display:"none"}}><Link href=""><FontAwesomeIcon icon={faHamburger} /> Add Meal</Link></li>
                                 <li style={{display:"none"}}><Link href="add-guest.html"><FontAwesomeIcon icon={faUserPlus} /> Add Guest</Link></li>
-                                <li><Link href={`${baseStoreURL}/hotels/download-ticket/${booking.bookingReference}`}><FontAwesomeIcon icon={faCloudDownloadAlt} /> Download Ticket</Link></li>
+                                <li><Link href="javascript:;" onClick={() => handleDownloadVoucher(booking.id,booking.bookingId)}><FontAwesomeIcon icon={faCloudDownloadAlt} /> Download Ticket</Link></li>
                             </ul>
                         </div>
                     </div>

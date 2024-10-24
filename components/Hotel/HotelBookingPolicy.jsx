@@ -24,8 +24,16 @@ export default function HotelBookingPolicy(props){
     if(!loading){
         return (
             <div className="dtalsTab bookingBox" id="bookingpolicyid">
-                <h2>Booking Policy</h2>
-                {parse(`${bookingPolicy}`)}
+                <h2>Booking Policy</h2>                
+                {props.hotel.amenities.length>0?
+                <ul>
+                    {props.hotel.amenities.map((amenity,i) => (
+                    amenity.key=='Things to keep in mind'?
+                    <li key={i}>{amenity.value}</li>  
+                    :''
+                    ))}
+                </ul>
+                :''}
             </div>
         );
     }else{

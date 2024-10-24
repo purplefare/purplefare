@@ -28,11 +28,11 @@ export default function HomeBannersSlider(props){
 			let BannerItems;
 			if(isMobile){
 				BannerItems = experienceBanners.map((item,i) => (
-					<Link href={`${baseStoreURL}/${item.hotel_link}`}><img src={`${item.mob_image}`} key={i} alt={`${item.destination}`} className="img-fluid borderRadiComman" /></Link>
+					<Link key={i} href={`${baseStoreURL}/${item.hotel_link}`}><img src={`${item.mob_image}`} alt={`${item.destination}`} className="img-fluid borderRadiComman" /></Link>
 				));
 			}else{
 				BannerItems = experienceBanners.map((item,i) => (
-					<Link href={`${baseStoreURL}/${item.hotel_link}`}><img src={`${item.image}`} key={i} alt={`${item.destination}`} className="img-fluid borderRadiComman" /></Link>
+					<Link key={i} href={`${baseStoreURL}/${item.hotel_link}`}><img src={`${item.image}`} alt={`${item.destination}`} className="img-fluid borderRadiComman" /></Link>
 				));
 			}
 			BannerView = (BannerItems);

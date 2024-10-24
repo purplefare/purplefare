@@ -55,16 +55,10 @@ export default function HotelOverview(props){
                 <div className="col-md-9">
                     <div className="dhName">
                         <h2>{hotelName}
-                            {props.hotel.rating!=null && props.hotel.rating!=undefined && props.hotel.rating>0?
+                            
+                            {props.hotel.category!=null && props.hotel.category!=undefined && props.hotel.category!=''?
                             <div className="hdStrRate">
-                                {generateTempArray(props.hotel.rating).map((item,i) => (
-                                <img key={i} src={`${baseStoreURL}/images/star-active.png`} alt="star-active.png" className="hstrActive"/>
-                                ))}
-                                {5-parseInt(props.hotel.rating)>0?
-                                generateTempArray(5-parseInt(props.hotel.rating)).map((item,i) => (
-                                <img src={`${baseStoreURL}/images/star.png`} alt="star.png" key={i} className="hstr"/>
-                                ))
-                                :''}
+                                <p>{props.hotel.category}</p>
                             </div>
                             :''}
                         </h2>

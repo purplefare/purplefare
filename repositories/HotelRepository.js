@@ -76,6 +76,15 @@ class HotelRepository {
         return reponse; 
     }
 
+    async recheckBookingRates(params){
+        const reponse = await Repository.post(`${baseUrl}/check-rooms-availability`,params)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => ({ error: JSON.stringify(error) }));
+        return reponse; 
+    }
+
     async fetchBookingForReview(params){
         const reponse = await Repository.post(`${baseUrl}/fetch-hotel-booking-for-review`,params)
         .then((response) => {
@@ -96,6 +105,15 @@ class HotelRepository {
 
     async fetchMyBookings(params){
         const reponse = await Repository.post(`${baseUrl}/fetch-my-bookings`,params)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => ({ error: JSON.stringify(error) }));
+        return reponse; 
+    }
+
+    async downloadVoucher(params){
+        const reponse = await Repository.post(`${baseUrl}/download-bookings-voucher`,params)
         .then((response) => {
             return response.data;
         })

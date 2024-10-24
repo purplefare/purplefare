@@ -9,7 +9,11 @@ import AuthRepository from '@/repositories/AuthRepository';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from 'next/link';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import {baseStoreURL} from '@/repositories/Repository';
+import parse from 'html-react-parser';
+import HotelCheckoutForm from '@/components/Hotel/HotelCheckoutForm';
 
 function HotelReview(props){
     const router = useRouter();
@@ -26,7 +30,13 @@ function HotelReview(props){
     const [holderEmail, setHolderEmail] = useState("");
     const [holderPhone, setHolderPhone] = useState("");
     const [actionLoader, setActionLoader] = useState(false);
+    const [importantComments, setImportantComments] = useState([]);
+    const [beforePaymentActionLoader, setBeforePaymentActionLoader] = useState(false);
+    const [commentPopupText, setCommentsPopupText] = useState([]);
+    const [commentsPopupOpen,setCommentsPopupOpen] = useState(false);
+    const [paymentTerms, setPaymentTerms] = useState(false);
 	const dispatch = useDispatch();
+    const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
     useEffect(() => {  
         let mounted = true;
         setLoading(true);
@@ -101,7 +111,7 @@ function HotelReview(props){
             }
             setLoading(false);
         }else{
-            //router.back() ?? router.push('/');
+            router.back() ?? router.push('/');
         }
     }
 
@@ -135,8 +145,17 @@ function HotelReview(props){
                             );
                         }else if(cancelItem.new_amount==rateItem.new_net && date==checkInDateStart){
                             return(<li key={k}><span className="text-red">Non Refundable</span></li>);
-                        }else if(date<checkInDateStart){
-                            return(<li key={k}><span className="text-red">Non Refundable</span></li>);
+                        }else if(cancelItem.new_amount!=rateItem.new_net && date!=checkInDateStart){
+                            return (
+                                <>
+                                <li key={k}>Free Cancellation before {date}</li>
+                                {cancelItem.new_amount==rateItem.new_net?
+                                <li key={k}><span className="redColor">Non Refundable after {date}</span></li>
+                                :
+                                <li key={k}>Cancellation charge start from {nextDayCancellation} {currencySign} {formatCurrency(cancelItem.new_amount)}</li>
+                                }
+                                </>
+                            );
                         }else if(cancelItem.new_amount==rateItem.new_net && date!=checkInDateStart){
                             return (
                                 <>
@@ -148,6 +167,8 @@ function HotelReview(props){
                                 }
                                 </>
                             );
+                        }else if(date<checkInDateStart){
+                            return(<li key={k}><span className="text-red">Non Refundable</span></li>);
                         }
                     }else{
                         return(<li key={k}><span className="text-red">Non Refundable</span></li>);
@@ -186,23 +207,35 @@ function HotelReview(props){
         let rateComments = "";
         let promotionText = "";
         let refundableText = "";
+        let taxesText = "";
         if(rateItem.rateComments!=null && rateItem.rateComments!=undefined && rateItem.rateComments!=''){
+            let temp = new Array();
+            for(var k=0;k<rateItem.rateComments.length;k++){
+                temp.push(parse(rateItem.rateComments[k].description));
+            }
             rateComments = (
-                <li>{rateItem.rateComments}</li>
+                rateItem.rateComments.map((rateComment,i) => (
+                    <li>{parse(rateComment.description)}</li>
+                ))
             );
         }
         if(rateItem.promotions!=null && rateItem.promotions!=undefined && rateItem.promotions!=''){
-            if(rateItem.promotions.name!=null && rateItem.promotions.name!=undefined && rateItem.promotions.name!=''){
-                promotionText = (
-                    <li>{rateItem.promotions.name}</li>
-                );
-            }
+            promotionText = (
+                    <li>{rateItem.promotions}</li>
+            );
+        }
+        if(rateItem.tax_lines!=null && rateItem.tax_lines!=undefined && rateItem.tax_lines!=''){
+            taxesText = (
+                rateItem.tax_lines.map((taxLine,i) => (
+                    <li>{taxLine}</li>
+                ))
+            );
         }
         let boardName = rateItem.boardName;
         if(rateItem.cancellationPolicies!=undefined && rateItem.cancellationPolicies!=null && rateItem.cancellationPolicies!=''){
             if(rateItem.cancellationPolicies.length>0){
                 rateItem.cancellationPolicies.map((cancelItem,k) => ( 
-                    cancellationPolicy = (<PrintCancellationPolicyDate k={k} currencySign={rateItem.currencySign} cancelItem={cancelItem} rateItem={rateItem} room={room}/>)
+                    cancellationPolicy = (<PrintCancellationPolicyDate key={k+parseInt(Math.random() + Math.random() * 10)} currencySign={rateItem.currencySign} cancelItem={cancelItem} rateItem={rateItem} room={room}/>)
                 ))
             }
         }
@@ -239,7 +272,8 @@ function HotelReview(props){
             <ul className="ps-3">   
                 {cancellationPolicy}    
                 {rateComments}  
-                {promotionText}      
+                {promotionText} 
+                {taxesText}     
                 {mealType}
             </ul>
         )
@@ -259,30 +293,25 @@ function HotelReview(props){
         e.preventDefault();
     }
 
-    async function updateBooking() {
-        setActionLoader(true);
+    async function recheckBookingRates(){
+        setBeforePaymentActionLoader(true);
         let params = "";
         if(auth.isLoggedIn){
-            params = { 'customerId':'','uuid':localStorage.getItem('uuid'),'token': auth.user.access_token, 'holderFirstName': holderName, 'holderSurName': holderSurName, 'holderEmail': holderEmail, 'holderPhone': holderPhone, 'bookingId': reviewBooking.id};
+            params = { 'attempt':auth.user.user.attempt,'uuid':localStorage.getItem('uuid'),'token': auth.user.access_token, 'holderFirstName': holderName, 'holderSurName': holderSurName, 'holderEmail': holderEmail, 'holderPhone': holderPhone, 'bookingId': reviewBooking.id};
         }else{
-            params = {  'customerId':'','uuid':localStorage.getItem('uuid'),'token': "", 'holderFirstName': holderName, 'holderSurName': holderSurName, 'holderEmail': holderEmail, 'holderPhone': holderPhone, 'bookingId': reviewBooking.id};
+            params = {  'attempt':'','uuid':localStorage.getItem('uuid'),'token': "", 'holderFirstName': holderName, 'holderSurName': holderSurName, 'holderEmail': holderEmail, 'holderPhone': holderPhone, 'bookingId': reviewBooking.id};
         }
-        const responseData = await HotelRepository.updateBooking(params);
+        const responseData = await HotelRepository.recheckBookingRates(params);
         if (responseData.success==1) {
-            toast.success(responseData.message);
-            setActionLoader(false);
-            setTimeout(
-                function () {
-                    router.push(baseStoreURL+responseData.redirect_url);
-                }.bind(this),
-                250
-            );
+            setBeforePaymentActionLoader(false);            
+            setCommentsPopupText(responseData.data.comments);
+            setCommentsPopupOpen(true);
         } else {
-            setActionLoader(false);
+            setBeforePaymentActionLoader(false);
             toast.error(responseData.message);
         }
-        setActionLoader(false);
-    }
+        setBeforePaymentActionLoader(false);
+    }    
 
     const generateBooking = (e) => {
         let flag = true;
@@ -305,10 +334,19 @@ function HotelReview(props){
         }
         
         if(flag){
-            updateBooking();
+            recheckBookingRates();
         }else{
             setLoading(false);
         }
+    }
+
+
+    const handlePaymentTerms = () => {
+        setPaymentTerms(!paymentTerms);
+    }
+
+    const handleCommentsPopup = () => {
+        setCommentsPopupOpen(false);
     }
 
     const generateRoomInclusionDetailsPopup = (code) => {
@@ -436,7 +474,7 @@ function HotelReview(props){
                                     <h2>{reviewBooking.hotelName} </h2>
                                     <p><i className="fas fa-map-marker-alt"></i> {titleCase(hotel.address)}, {titleCase(hotel.city)}, {titleCase(hotel.country)} - <Link href={`https://maps.google.com/maps?z=12&q=loc:${hotel.lat},${hotel.lng}`} target="_blank">View on map</Link></p>
                                     <div className="hdRatingbox cartRate">
-                                        <Link href="javascript:;" className="">{parseFloat(hotel.rating).toFixed(1)}</Link>
+                                        <Link href="javascript:;" className="">{hotel.category}</Link>
                                     </div>
                                     <div className="cartBinfo">
                                         <div>
@@ -481,14 +519,14 @@ function HotelReview(props){
                                         </div>
                                         {room.roomAdults>1?
                                             room.roomChild>0?
-                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adults & {room.roomChild} Child {room.quantity>1?`X ${room.quantity} Rooms`:''}</p>
+                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adults & {room.roomChild} Child {room.quantity>1?`X ${room.quantity} Rooms`:`X ${room.quantity} Room`}</p>
                                             :
-                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adults {room.quantity>1?`X ${room.quantity} Rooms`:''}</p>
+                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adults {room.quantity>1?`X ${room.quantity} Rooms`:`X ${room.quantity} Room`}</p>
                                         :
                                             room.roomChild>0?
-                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adult & {room.roomChild} Child {room.quantity>1?`X ${room.quantity} Rooms`:''}</p>
+                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adult & {room.roomChild} Child {room.quantity>1?`X ${room.quantity} Rooms`:`X ${room.quantity} Room`}</p>
                                             :
-                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adult {room.quantity>1?`X ${room.quantity} Rooms`:''}</p>
+                                            <p className="smallTxt grayColor mb-2">{room.roomAdults} Adult {room.quantity>1?`X ${room.quantity} Rooms`:`X ${room.quantity} Room`}</p>
                                         }
                                         <HotelRoomFacilitiesInformation room={room}/>
                                         <HotelRoomCancellationProgressBar room={room}/>                                     
@@ -500,9 +538,21 @@ function HotelReview(props){
 
                         <div className="boxWithShadow mb-3 bg-warning-pp">
                             <div className="cartInfobox">
-                                <h2>Important Information</h2>
+                                <h2>Important Information</h2>                                
                                 <ul>
                                     <li>Check-in begins at {reviewBooking.checkInTime} and check-out is at {reviewBooking.checkOutTime}.</li>
+                                    {hotel.amenities.length>0?
+                                        hotel.amenities.map((amenity,i) => (
+                                        amenity.key=='Things to keep in mind'?
+                                        <li key={i}>{amenity.value}</li>  
+                                        :''
+                                        ))
+                                    :''}
+                                    {importantComments.length>0?
+                                        importantComments.map((rateComment,i) => (
+                                            <li key={i+99}>{rateComment}</li>  
+                                        ))
+                                    :''}
                                     <li>By selecting Book & Pay you agree to the Booking Conditions,<a href={`${baseStoreURL}/pages/terms-conditions`} target="_blank">Terms & Conditions</a> and <a href={`${baseStoreURL}/pages/privacy-policy`} target="_blank">Privacy Policy.</a></li>
                                 </ul>
                             </div>
@@ -602,27 +652,29 @@ function HotelReview(props){
                             <ul className="purchase-props">
                                 <li className="flex-between">
                                     <span className="cttitle">{reviewBooking.totalRooms} Room x {reviewBooking.totalNight} Nights <span>Base Price</span></span>
-                                    <span className="ctdtals"><strong className="hsalePrice">{hotelBooking.currency} {formatCurrency(parseFloat(hotelBooking.amount)-parseFloat(hotelBooking.taxes))}</strong></span> 
+                                    <span className="ctdtals"><strong className="hsalePrice">{reviewBooking.bookingCurrency} {formatCurrency(parseFloat(reviewBooking.bookingAmount))}</strong></span> 
                                 </li>
-                                {hotelBooking.amount>hotelBooking.saleAmount?
+                                {reviewBooking.bookingAmount>reviewBooking.bookingPayableAmount?
                                     <>
                                         <li className="flex-between cartDiscount">
                                             <span className="cttitle">Total Discount</span>
-                                            <span className="ctdtals">{hotelBooking.currency} {formatCurrency(hotelBooking.amount-hotelBooking.saleAmount)}</span> 
+                                            <span className="ctdtals">{reviewBooking.bookingCurrency} {formatCurrency(reviewBooking.bookingAmount-reviewBooking.bookingPayableAmount)}</span> 
                                         </li>                                
                                         <li className="flex-between">
                                             <span className="cttitle">Price after Discount</span>
-                                            <span className="ctdtals">{hotelBooking.currency} {formatCurrency(parseFloat(hotelBooking.saleAmount)-parseFloat(hotelBooking.taxes))}</span> 
+                                            <span className="ctdtals">{reviewBooking.bookingCurrency} {formatCurrency(parseFloat(reviewBooking.bookingPayableAmount)-parseFloat(reviewBooking.bookingTaxes))}</span> 
                                         </li>
                                     </>
                                 :''}
+                                {reviewBooking.bookingTaxes>0?
                                 <li className="flex-between">
                                     <span className="cttitle">Taxes and fees</span>
-                                    <span className="ctdtals">{hotelBooking.currency} {formatCurrency(hotelBooking.taxes)}</span> 
+                                    <span className="ctdtals">{reviewBooking.bookingCurrency} {formatCurrency(reviewBooking.bookingTaxes)}</span> 
                                 </li>
+                                :''}
                                 <li className="flex-between">
                                     <span className="cttitle">Total Amount to be paid</span>
-                                    <span className="ctdtals">{hotelBooking.currency} {formatCurrency(hotelBooking.saleAmount)}</span> 
+                                    <span className="ctdtals">{reviewBooking.bookingCurrency} {formatCurrency(reviewBooking.bookingPayableAmount)}</span> 
                                 </li>
                                 </ul>
                         </div>
@@ -682,6 +734,46 @@ function HotelReview(props){
             <div className="loaderbg" style={{display:actionLoader==false?"none":"block"}}>
                 <img src={`${baseStoreURL}/images/purplefare-loader.gif`} alt="purplefare-loader.gif" />
             </div>
+            <div className="loaderbg" style={{display:beforePaymentActionLoader==false?"none":"block"}}>
+                <p>Please wait, Until we check the Availability of the selected Rooms</p>
+            </div>
+            {/* PROCEED TO PAYMENT BOOKING POPUP FOR TEXT */}
+            <div className={`modal__container ${commentsPopupOpen==true?`show-modal reviewPopup`:`reviewPopup`}`} id="refresh-popup">
+                <div className="modal__content modal-sm">
+                    <div className="modal__close close-modal5 refreshbtn" title="Close" onClick={() => handleCommentsPopup()}>
+                        <img src={`${baseStoreURL}/images/close.png`} alt="close.png" className="modal__img"/>
+                    </div>
+                    <h2 className="modal__title">Most Important Instructions</h2>
+                    {commentPopupText.length>0?
+                        <div className="popupInner">
+                            <ul>
+                                {commentPopupText.map((comment,i) => 
+                                    <li key={i}>{parse(comment)}</li>
+                                )}
+                            </ul>
+                        </div>
+                        :''
+                    }
+                    <input type="checkbox" id="payment-terms" name="payment-terms" defaultChecked={false} checked={paymentTerms} onChange={() => handlePaymentTerms()}/> <p className="smallTxt">By proceeding, I agree to purplefare’s User Agreement, Terms of Service, Supplier Terms & Conditions and Cancellation & Property Booking Policies</p>
+                    {paymentTerms==true?
+                        <>
+                            <Elements stripe={stripePromise}>
+                            <HotelCheckoutForm
+                                order_id={reviewBooking.bookingId}
+                                order_amount={reviewBooking.bookingPayableAmount}
+                                customer_email={holderEmail}
+                                bookingInfo={reviewBooking}
+                                holderName={holderName}
+                                holderSurName={holderSurName} 
+                                holderEmail={holderEmail}
+                                holderPhone ={holderPhone}
+                            />
+                            </Elements>
+                        </>
+                    :''}
+                </div>
+            </div>
+            {/* END OF PROCEED TO PAYMENT BOOKING POPUP FOR TEXT*/} 
             <ToastContainer autoClose={2000} closeOnClick draggable theme="light"/>
             </Fragment>
         );

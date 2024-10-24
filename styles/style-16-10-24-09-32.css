@@ -27,91 +27,6 @@
   font-display: swap;
 }
 
-/*COMMAN CSS*/
-.rs-picker-popup-daterange{z-index: 9999999!important;}
-@font-face {
-  font-family: 'Jost';
-  src: url('../public/fonts/Jost-Bold.woff2') format('woff2'),
-    url('../public/fonts/Jost-Bold.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Jost';
-  src: url('../public/fonts/Jost-Light.woff2') format('woff2'),
-    url('../public/fonts/Jost-Light.woff') format('woff');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Jost';
-  src: url('../public/fonts/Jost-Medium.woff2') format('woff2'),
-    url('../public/fonts/Jost-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-/*REVIEW POPUP*/
-.reviewPopup{ opacity: 1 !important; } 
-.reviewPopup .modal__content{ width: 100%; max-width: 800px; text-align: left; transform:none;}
-.reviewPopup .modal__content p{ text-align: center;}
-.reviewPopup ul{ text-align: left; list-style: none; padding: 0; margin: 0;}
-.reviewPopup ul li{ padding-left: 1em; text-indent: -.7em; line-height: 22px; padding-bottom: 8px;}
-.reviewPopup ul li:before{content: "• "; color: #b9228e; font-size: 24px; font-weight: bold; vertical-align: middle;}
-.reviewPopup .popupInner{ height: 460px; scrollbar-width: thin; overflow-y: scroll; overflow-x: hidden;}
-.popupBtn{
-  font-size: 17px;
-    font-weight: 500;
-    text-decoration: none;
-    color: #fff;
-    border-radius: 50px;
-    padding: 8px 26px;
-    margin-top: 6px;
-    display: inline-block;
-}
-.purpleGriditnBtn{background: rgb(200, 35, 139); background: linear-gradient(239deg, rgba(200, 35, 139, 1) 0%, rgba(131, 29, 152, 1) 100%);}
-
-@media (max-width: 992px) {
-  .modal__container.reviewPopup{ margin: 0; padding-top: 0;}
-  .modal__container.refreshShreviewPopupowPopup{ margin-top: 0!important;}
-  .reviewPopup .modal__content{ transform: none!important; margin: auto; }
-}
-@media (max-width: 480px) {
-.reviewPopup{  width: 100%;} 
-}
-/*END REVIEW POPUP*/
-
-
-/*REFRESH POPUP*/
-.refreshShowPopup{ opacity: 1 !important; visibility: visible !important; width: 500px;} 
-.refreshShowPopup .modal__content{ width: 100%; max-width: 500px; text-align: center; transform:none;}
-.refreshShowPopup .modal__content p{ text-align: center;}
-.refreshBtn{
-  font-size: 17px;
-    font-weight: 500;
-    text-decoration: none;
-    color: #fff;
-    border-radius: 50px;
-    background: rgb(200, 35, 139);
-    background: linear-gradient(239deg, rgba(200, 35, 139, 1) 0%, rgba(131, 29, 152, 1) 100%);
-    padding: 8px 26px;
-    margin-top: 6px;
-    display: inline-block;
-}
-@media (max-width: 992px) {
-  .modal__container.refreshShowPopup{ margin-top: 0!important;}
-  .refreshShowPopup .modal__content{ transform: none!important; margin: auto;}
-}
-@media (max-width: 480px) {
-.refreshShowPopup{  width: 100%;} 
-}
-/*REFRESH POPUP*/
-
 a.dummyLink{ text-decoration: none;}
 
 h1,
@@ -345,13 +260,6 @@ ul.logedInUserdd li img{ width: 19px; margin-right: 8px;}
 .copyRight {
   font-size: 15px;
 }
-.copyContainer{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-}
-.copyContainer img{ max-width: 180px; margin-right: 10px;}
 
 /*END FOOTER*/
 
@@ -5476,15 +5384,12 @@ ul.cartChkList li {
   border: 1px solid #ddd;
   padding: .35em;
 }
-.myaccRight .profileInfo table tr td:first-child{ font-weight: bold;}
-
 
 .profileInfo table th,
 .profileInfo table td {
   padding: .625em;
   text-align: left;
 }
-
 
 .profileInfo table th {
   font-size: .85em;
@@ -5557,26 +5462,6 @@ ul.cartChkList li {
   outline: none;
   border: 1px solid #ceaee8;
 }
-.editProfile .form-control{ position: relative;}
-.editProfile .form-control .rs-input-group-addon{ position: absolute; right: 0;}
-.editProfile .form-control .rs-input-group-addon button{ background: none; border: 0;}
-
- 
-
-.editProfile .form-control input.rs-input{ margin: 0!important; height: 25px!important;  border: 0;}
-.editProfile select{
-  border-radius: 5px;
-  width: 100%;
-  height: 40px;
-  margin: 5px 0 12px 0;
-  padding: 10px;
-  font-size: 1em;
-  color: #8b878e;
-  font-weight: 400;
-  outline: none;
-  border: 1px solid #ceaee8;
-}
-
 .proUpdateBtn,
 input.proUpdateBtn{
   background: linear-gradient(81deg, #c8238b 0%, #ff8f00 24%, #bf31dd 100%) /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */;

@@ -125,6 +125,9 @@ function NavHeader (props) {
 	async function loginUser() {
 		setLoading(true);
 		setActionBtnLoading(true);
+		let completePath = Router.asPath;
+		let PathArray = completePath.split("?");
+		let currentPath = PathArray[0];
 		const params = { 'email': loginEmail,'password': loginPassword };
 		const responseData = await AuthRepository.Login(params);
 		if (responseData.success==1) {
@@ -136,7 +139,7 @@ function NavHeader (props) {
 			setLoginPassword("");
 			setLoginUserEmail(loggedInUser.user.email);
 			setLoginUserName(loggedInUser.user.name);
-			Router.push('/');
+			Router.push(completePath);
 			setVisibleValue("");
 		}else{
 			setActionBtnLoading(false);
@@ -151,6 +154,9 @@ function NavHeader (props) {
 	async function registerUser() {
 		setLoading(true);
 		setActionBtnLoading(true);
+		let completePath = Router.asPath;
+		let PathArray = completePath.split("?");
+		let currentPath = PathArray[0];
 		const params = {'name':registerName, 'email': registerEmail,'password': registerPassword };
 		const responseData = await AuthRepository.Register(params);
 		if (responseData.success==1) {
@@ -164,7 +170,7 @@ function NavHeader (props) {
 			setRegisterName("");
 			setRegisterPassword("");
 			setRegisterTermsConditions(0);
-			Router.push('/');		
+			Router.push(completePath);		
 		}else{
 			toast.error(responseData.message);
 			setActionBtnLoading(false);

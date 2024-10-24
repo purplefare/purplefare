@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, {useState, useEffect, Fragment} from 'react';
 import { baseUrl } from '@/repositories/Repository';
 import NavHeader from "@/components/layouts/NavHeader";
 import HomeSearch from "@/components/Home/HomeSearch";
@@ -13,46 +13,53 @@ import HomeVideo from "@/components/Home/HomeVideo";
 import HomeWhyBookWithUs from "@/components/Home/HomeWhyBookWithUs";
 import HomeTrustedPartners from "@/components/Home/HomeTrustedPartners";
 import Footer from "@/components/layouts/Footer";
+import StoreRepository from '@/repositories/StoreRepository';
 function Home(props) {
-	let page_props = props.props.data;
-    if(page_props!='' && page_props!=undefined && page_props!=null){
-        if(page_props.data.page!=null && page_props.data.page!=undefined && page_props.data.page!=''){
-			return (
-				<Fragment>
-					<NavHeader/>
-					<section className="homePage">
-						<HomeSearch/>
-						<HomeExploreDestination exploreDestination={page_props.data.list_home_destinations}/>
-						<HomeBannersSlider experienceBanners={page_props.data.list_home_experience}/>
-						<HomeMostBookedHotels mostBookedHotels={page_props.data.list_most_booked_hotels}/>
-						<HomeAboutUs aboutContent={page_props.data.about_section}/>
-						<HomeLatestNews/>
-						<HomeReviews customerReviews={page_props.data.list_customer_reviews}/>
-						<HomeVideo/>
-						<HomeWhyBookWithUs/>
-					</section>
-					<Footer/>
-				</Fragment>
-			);
-		}else{
-			return (
-				<Fragment>
-					<NavHeader/>
-					<section className="homePage">
-						<HomeSearch/>
-						<HomeExploreDestination/>
-						<HomeBannersSlider/>
-						<HomeMostBookedHotels/>
-						<HomeAboutUs/>
-						<HomeLatestNews/>
-						<HomeReviews/>
-						<HomeVideo/>
-						<HomeWhyBookWithUs/>
-					</section>
-					<Footer/>
-				</Fragment>
-			);
+	const [homepage, setHomePage] =  useState(null);
+	const [loading, setLoading] = useState(false);
+	const [homeDestination, setHomeDestination] = useState(null);
+	const [homeExperience,setHomeExperience] = useState(null);
+	const [aboutSection, setAboutSection] = useState(null);
+	const [customerReviews, setCustomerReviews] = useState(null);
+	useEffect(() => {  
+        let mounted = true;
+		fetchHomePage();
+		return () => mounted = false;
+	}, []);
+
+	async function fetchHomePage(){
+		setLoading(true);
+        const responseData = await StoreRepository.fetchHomePage();
+        if(responseData.success==1){
+            setHomePage(responseData.data.page);
+            setHomeDestination(responseData.data.list_home_destinations);
+			setHomeExperience(responseData.data.list_home_experience);
+			setAboutSection(responseData.data.about_section);
+			setCustomerReviews(responseData.data.list_customer_reviews);
+			setLoading(false);
+        }else{
+			setLoading(false);
 		}
+    }
+
+	if(!loading){
+        return (
+			<Fragment>
+				<NavHeader/>
+				<section className="homePage">
+					<HomeSearch/>
+					<HomeExploreDestination exploreDestination={homeDestination}/>
+					<HomeBannersSlider experienceBanners={homeExperience}/>
+					<HomeMostBookedHotels/>
+					<HomeAboutUs aboutContent={aboutSection}/>
+					<HomeLatestNews/>
+					<HomeReviews customerReviews={customerReviews}/>
+					<HomeVideo/>
+					<HomeWhyBookWithUs/>
+				</section>
+				<Footer/>
+			</Fragment>
+		);
 	}else{
 		return (
 			<Fragment>
@@ -61,7 +68,6 @@ function Home(props) {
 					<HomeSearch/>
 					<HomeExploreDestination/>
 					<HomeBannersSlider/>
-					<HomeMostBookedHotels/>
 					<HomeAboutUs/>
 					<HomeLatestNews/>
 					<HomeReviews/>
@@ -86,7 +92,7 @@ Home.getInitialProps = async(context) => {
         },
         body: JSON.stringify({'slug':slug})
     };
-    const data = await fetch(`${baseUrl}/fetch-homepage`,settings)
+    const data = await fetch(`${baseUrl}/fetch-page`,settings)
     .then(response => response.json());
     return {
 		props: { data },

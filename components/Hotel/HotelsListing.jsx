@@ -26,7 +26,7 @@ import { isMobile } from 'react-device-detect';
 function HotelsListing(props){
     const router = useRouter();
     const dispatch = useDispatch();
-    const [skeltonLoading, setSkeltonLoading] = useState(false);
+    const [skeltonLoading, setSkeltonLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [traceId,setTraceId] = useState(null);
     const [currentPage,setCurrentPage] = useState(1);
@@ -451,12 +451,7 @@ function HotelsListing(props){
                         <div className="hListnDels">
                             <h2>{item.name}</h2>
                             <div className="hStrRate">
-                                {item.rating>0?generateTempArray(item.rating).map((i) => (
-                                <img src={`${baseStoreURL}/images/star-active.png`} key={i} alt="star-active.png" className="hstrActive" />
-                                )):''}
-                                {5 - item.rating>0?generateTempArray(5 - item.rating).map((i) => (
-                                <img src={`${baseStoreURL}/images/star.png`} key={i} alt="star.png" className="hstr" />
-                                )):''}
+                                {item.categoryName}
                             </div>
                             <p className="hAddr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg> {item.address}</p>
                             <ul className="hChkList" style={{display:"none"}}>
@@ -480,7 +475,7 @@ function HotelsListing(props){
                     </div>
                     <div className="hListnCalActin">
                         <div className="hRatings">
-                            <Link href="javascript:;" className="">{Math.round(item.rating).toFixed(1)}</Link> {item.ratingType}
+                            <Link href="javascript:;" className="">{Math.round(item.rating).toFixed(1)}</Link> TripAdvisor
                         </div>
                         <div className="loffers" style={{display:"none"}}>
                             <h5 className="hOfferPerct">15% off</h5>

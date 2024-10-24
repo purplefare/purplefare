@@ -30,7 +30,7 @@ export default function Footer(){
 									<li><a href={`${baseStoreURL}/pages/about-us`}>About us</a></li>
 									<li style={{display:"none"}}><a href={`${baseStoreURL}/pages/careers`}>Careers</a></li>
 									<li><a href={`${baseStoreURL}/pages/privacy-policy`}>Privacy Policy</a></li>
-									<li><a href={`${baseStoreURL}/pages/terms-conditions`}>Terms of use</a></li>
+									<li><a href={`${baseStoreURL}/pages/terms-conditions`}>Term & Conditions</a></li>
 								</ul>
 							</div>
 						</div>
@@ -62,7 +62,10 @@ export default function Footer(){
 		<div className="container">
 			<div className="row">
 				<div className="col-md-12">
-					<p className="mt-3 mb-3 text-center copyRight">Copyright ©2024 All rights reserved Vacationum Trip LLC</p>
+					<div className="copyContainer">
+					    <img src={`${baseStoreURL}/images/arc-logo.webp`} alt="arc-logo.webp"/>
+					    <p className="mt-3 mb-3 text-center copyRight">Copyright ©2024 All rights reserved Vacationum Trip LLC</p>
+					</div>
 				</div>
 			</div>
 		</div>
